@@ -1,41 +1,39 @@
-from typing import Optional
+from dataclasses import dataclass
+from typing import Optional, List
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from pyperunner.models import SourceBase
 
 
-class Tables(SourceBase):
+class Table(SourceBase):
     __tablename__ = "src_tables"
 
-    id: Mapped[Optional[int]] = mapped_column(primary_key=True, autoincrement="auto",)
+    id: Mapped[int] = mapped_column(primary_key=True)
     table_alias: Mapped[str] = mapped_column(unique=True)
-    # query_fk: Mapped[int] = mapped_column(ForeignKey("query.id"))
     is_incremental_load: Mapped[bool]
-
-    # queries: Mapped["Query"] = relationship(back_populates="src_tables")
-    # merge_keys: Mapped["MergeKeys"] = relationship(back_populates="src_tables")
-
-    
-class Query(SourceBase):
-    __tablename__ = "src_queries"
-
-    id: Mapped[Optional[int]] = mapped_column( primary_key=True, autoincrement="auto")
-    table_id: Mapped[int] = mapped_column(ForeignKey("src_tables.id"))
     raw_query: Mapped[str] 
-    has_bind_params: Mapped[bool]
+
+    merge_keys: Mapped[List["MergeKeys"]] = relationship("MergeKeys", back_populates="table", cascade="all, delete-orphan")
+
+# class BindParams(SourceBase):
+#     __tablename__ = "src_bind_params"
     
-    # tables: Mapped["Tables"] = relationship(back_populates="src_queries")
+#     table_id: Mapped[int] = mapped_column("source_table_id", ForeignKey("src_tables.id"), primary_key=True)
+#     table_bind_params_idx: Mapped[int] = mapped_column("bind_param_idx", index=True, primary_key=True)
+#     column_name: Mapped[str]
 
 
 class MergeKeys(SourceBase):
     __tablename__ = "src_merge_keys"
     
-    table_id: Mapped[int] = mapped_column(ForeignKey("src_tables.id"), primary_key=True)
-    id: Mapped[Optional[int]] = mapped_column(primary_key=True, autoincrement="auto")
+    merge_key_idx: Mapped[int] = mapped_column( index=True, nullable=False)
     column_name: Mapped[str]
+    table_id: Mapped[int] = mapped_column(ForeignKey("src_tables.id"))
 
-    # tables: Mapped["Tables"] = relationship(back_populates="src_merge_keys")
+    table: Mapped["Table"] = relationship("Table", back_populates="merge_keys")
+    
+
 
 
     
