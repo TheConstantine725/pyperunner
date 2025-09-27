@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+
+# Coding Tests
+tests/.dev
+.databases
