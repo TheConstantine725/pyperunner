@@ -13,3 +13,5 @@ wheels/
 # Coding Tests
 tests/.dev
 .databases
+dump
+jupyter
